@@ -89,7 +89,8 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 50%, rgba(0,0,0,0.05) 100%);
+  /* replaced gradient with a subtle flat overlay for depth (no gradient colors) */
+  background: rgba(0,0,0,0.02);
   pointer-events: none;
   z-index: 1;
 }
@@ -215,9 +216,7 @@
   letter-spacing: 0.025em;
 }
 
-/* Clean, Spacious Cards */
-.modern-card {
-  background: white;
+.fa.fa-spin { /* keep spinning icons (loader) as-is */ }
   border-radius: var(--border-radius);
   border: 1px solid rgba(0, 0, 0, 0.08);
   box-shadow: var(--box-shadow);
@@ -256,7 +255,8 @@
   content: '';
   flex: 1;
   height: 1px;
-  background: linear-gradient(90deg, rgba(0,0,0,0.1), transparent);
+  /* removed decorative gradient -> use flat divider */
+  background: rgba(0,0,0,0.06);
 }
 
 /* Clean Data Cards */
@@ -596,7 +596,8 @@
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+  /* replaced shimmer gradient with subtle solid overlay; shimmer animation removed by overrides below */
+  background: rgba(255,255,255,0.5);
   animation: shimmer 2s infinite;
 }
 
@@ -982,13 +983,14 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--primary-gradient);
+  background: var(--primary-color);
   border-radius: 6px;
   border: 2px solid rgba(255,255,255,0.3);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+  /* replaced accent gradient with flat primary color */
+  background: var(--primary-color);
 }
 
 /* Responsive Enhancements */
@@ -1073,8 +1075,9 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(135deg, #007aff 0%, #5856d6 50%, #af52de 100%);
-  transform: scale(1.1);
+  /* use flat primary color */
+  background: var(--primary-color);
+  transform: none !important;
 }
 
 /* Firefox Scrollbar */
@@ -1141,7 +1144,8 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Cloudflare-inspired Loading States */
 .loading-skeleton {
-  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  /* neutral loading skeleton to flat color */
+  background: var(--light-color);
   background-size: 200% 100%;
   animation: loading 1.5s infinite;
   border-radius: var(--border-radius-sm);
@@ -1197,3 +1201,383 @@ h1, h2, h3, h4, h5, h6 {
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
+
+/* -----------------------------
+ * Accessibility & Flat Visuals
+ * -----------------------------
+ * This section neutralizes 3D/scale transforms, animations that rely on transforms,
+ * and background-image linear-gradients (like shimmer or striped gradients) that
+ * come from palette or bundled minified CSS. We intentionally avoid removing
+ * content images and keep keyboard focus outlines intact for a11y.
+ */
+
+/* Prefer not to affect content images - target UI/controls and helper classes */
+button, a.btn, .btn, .badge, .thumbnail, .icons-container, .small-icons-container, .navbar-default .navbar-nav > li > a, .dropdown-menu li a {
+  transform: none !important;
+  transition: box-shadow .18s ease, opacity .18s ease !important;
+}
+
+/* Hover interactions: keep subtle opacity / shadow, no scale */
+button:hover, a.btn:hover, .btn:hover, .badge:hover, a.dropdown-toggle:hover, .icons-container:hover, .small-icons-container:hover {
+  transform: none !important;
+  opacity: .95 !important;
+  box-shadow: 0 6px 18px rgba(36,41,46,0.06) !important;
+}
+
+/* Specifically neutralize transform-based animation helper classes from bundle */
+.faa-bounce, .faa-burst, .faa-flash, .faa-pulse, .faa-tada, .faa-float, .faa-horizontal, .faa-vertical, .faa-shake, .faa-spin, .faa-passing, .faa-ring, .faa-fade {
+  animation: none !important;
+  transform: none !important;
+}
+
+/* More generic helper for classes that bring transforms via animation */
+.animated, .animated-hover, [class*="-animation"], [class*="-ani"] {
+  animation: none !important;
+  transform: none !important;
+}
+
+/* Disable transform-based modal dialog zooms */
+.modal.fade .modal-dialog,
+.modal.fade.in .modal-dialog,
+.modal.fade2 .modal-dialog,
+.modal.fade3 .modal-dialog,
+.modal.fade10 .modal-dialog {
+  animation: none !important;
+  transform: none !important;
+}
+
+/* Carousels should fade/opacity rather than translate3d / slide*/
+.carousel .item,
+.carousel-item,
+.jcarousel-item {
+  transform: none !important;
+  transition: opacity .22s ease !important;
+}
+
+/* Progress / shimmer / skeleton - use flat colors, disable striped gradients */
+.progress,
+.progress-striped,
+.progress .progress-bar,
+.progress .progress-bar::before,
+.progress .progress-bar::after,
+.loading-skeleton,
+.loading-skeleton::before,
+.loading-skeleton::after,
+.shimmer,
+.loader,
+.loader::before,
+.progress.stripe::before,
+.skeleton,
+.skeleton::before,
+.skeleton::after {
+  background-image: none !important;
+  background: var(--bg-color, #fff) !important;
+  box-shadow: none !important;
+  animation: none !important;
+}
+
+/* Palette / Texture overrides - neutralize repeating gradients applied by palettes */
+.repeating-gradient-texture,
+.palette-textured,
+.palette-overlay,
+.pal-gradient,
+.pal-nightrider,
+.pal-texture {
+  background-image: none !important;
+  background: var(--bg-color, #fff) !important;
+}
+
+/* Select components (select2, chosen) solid backgrounds */
+.select2-container--default .select2-selection--single,
+.select2-container--default .select2-results__option,
+.chosen-container .chosen-drop {
+  background-image: none !important;
+  background-color: var(--bg-color, #fff) !important;
+}
+
+/* Tooltips and toasts: don't use transform; fade only */
+.toast, .iziToast, .notify, .notify .toast {
+  transform: none !important;
+  animation: none !important;
+  transition: opacity .22s ease !important;
+}
+
+/* Explicitly remove scale transforms for images with 'scale' classes added by JS */
+img[class*="scale"], .thumb[class*="scale"], .avatar[class*="scale"] {
+  transform: none !important;
+}
+
+/* Prevent transform on FAA helpers / pop classes only (leave FontAwesome icons & rotations intact) */
+.faa-burst, .faa-bounce, .faa-pulse, .faa-tada, .faa-float, .obj-popup, .bg-puff-out {
+  transform: none !important;
+  animation: none !important;
+}
+
+/* Keep Font Awesome icons rotations/flips working; override explicit scaled icon children */
+.btn:not(.btn-link) i { transform: none !important; }
+
+/* More targeted overrides for lib & palette rules (bundle.min.css, palettes, extensions) */
+/* Progress stripes: convert to solid bars */
+.progress-bar, .progress-striped .progress-bar, .progress-bar-striped, .progress .progress-bar, .progress-striped {
+  background-image: none !important;
+  background: var(--primary-color) !important;
+}
+
+/* Carousel control overlay gradients -> removed */
+.carousel-control, .carousel-control.left, .carousel-control.right {
+  background-image: none !important;
+  background: transparent !important;
+}
+
+/* Select2 classic backgrounds and arrows */
+.select2-container--classic .select2-selection--single,
+.select2-container--classic .select2-selection--single .select2-selection__arrow,
+.select2-container--classic.select2-container--open .select2-selection--single {
+  background-image: none !important;
+  background: var(--light-color) !important;
+}
+
+/* Repeating gradient palettes, stripe backgrounds and details boxes */
+details, details.default, details.success, details.warning, details.info, details.error {
+  background-image: none !important;
+  background: var(--bg-color, #fff) !important;
+}
+
+/* Icon rows & grid textures */
+.row.icons-row .icons-container,
+.row.icons-row .small-icons-container,
+.background-empty-lines-light-grey,
+.ui_grid_row>.ui_grid_cell {
+  background-image: none !important;
+  background: var(--bg-color, #fff) !important;
+}
+
+/* Nice: mCustomScrollbar gradients */
+.mCSB_dragger .mCSB_dragger_bar,
+.mCS-3d.mCSB_scrollTools .mCSB_dragger .mCSB_dragger_bar {
+  background-image: none !important;
+  background: rgba(0,0,0,0.15) !important;
+}
+
+/* Extension specific overrides */
+.fancytree-loader, #content .fancytree-loader, .fancytree .fancytree-loader {
+  background-image: none !important;
+  animation: none !important;
+  background: rgba(0,0,0,0.05) !important;
+}
+
+.bottom_progress_lane, .bottom_progress_level, .bottom_progress_horizontal {
+  background-image: none !important;
+  background: rgba(0,0,0,0.08) !important;
+  animation: none !important;
+}
+
+/* Photo thumbnails, file manager scaling */
+.file-manager .container-fluid td>a>img, img.scale-08, .scale-08, img[class*="scale"]{
+  transform: none !important;
+}
+
+/* jsPanel: controlbars & content panels shouldn't scale */
+.jsPanel-replacement .jsPanel-controlbar, .jsPanel .jsPanel-controlbar {
+  transform: none !important;
+}
+
+/* Don't disable FontAwesome rotation/flip; but prevent animation helpers from scaling icons */
+/* Avoid a broad FA rule; keep FA rotations/flips intact */
+
+/* Avoid overriding global animations like fade - but disable transform-based ones we don't want */
+.obj-popup, .bg-puff-out, .puff-out, .faa-parent, .faa-burst, .faa-bounce, .faa-pulse, .faa-tada {
+  animation: none !important;
+  transform: none !important;
+}
+
+/* Ensure scrollbar thumbs are a solid color (no gradient) */
+::-webkit-scrollbar-thumb {
+  background-image: none !important;
+  background: var(--primary-color) !important;
+}
+
+/* Remove shimmering skeletons from extensions and mail plugin */
+.loading-shimmer, .loading-shimmer::after, .skeleton, .skeleton::after, .skeleton::before {
+  background-image: none !important;
+  background: var(--light-color) !important;
+  animation: none !important;
+}
+
+/* A final catch all for repeating-linear-gradients used commonly */
+[class*="repeating-linear-gradient"], [class*="repeating-gradient"], [class*="linear-gradient"], [class*="pal-"], [class*="palette-"] {
+  background-image: none !important;
+}
+
+/* Specific overrides for known selectors that use scale() in bundle/palette CSS */
+.select2-selection__rendered .menu-status-label { transform: none !important; }
+#sidebar [data-menu-link-icon-demo]:after { animation: none !important; transform: none !important; }
+
+/* jsPanel / controlbar scaled in replacement - neutralize */
+.jsPanel-controlbar, .jsPanel-replacement .jsPanel-controlbar { transform: none !important; }
+
+/* File manager thumbnails scaled - neutralize so no scaled images by CSS */
+.file-manager img, .file-manager .container-fluid td>a>img, .file-manager .thumbnail img { transform: none !important; }
+
+/* Keep keyboard focus visible, preserve accessibility */
+*:focus { outline: 3px solid rgba(30,136,229,0.18); outline-offset: 2px; }
+
+/* Avoid removing transitions entirely, prefer opacity / color transitions */
+*:not(.no-transition) { transition-property: background-color, color, border-color, opacity, box-shadow; transition-duration: .18s; transition-timing-function: ease; }
+
+/* =====================================================================
+   Deep neutralization for remaining scale/transform/gradient rules
+   - Target only selectors we know use 3D or scaling effects (modals, carousels, helper animations)
+   - Avoid interfering with Font Awesome rotation and functional spirals (e.g., .fa-spin)
+   - Still preserve focus outlines and non-transform transitions
+   ===================================================================== */
+
+/* Neutralize 3D transforms and scale in modal entry animations */
+.modal.fade2 .modal-dialog,
+.modal.fade3 .modal-dialog,
+.modal.fade4 .modal-dialog,
+.modal.fade8 .modal-dialog,
+.modal.fade9 .modal-dialog,
+.modal.fade10 .modal-dialog {
+  -webkit-transform: none !important;
+  transform: none !important;
+  opacity: 1 !important;
+  -webkit-transition: opacity .22s ease !important;
+  transition: opacity .22s ease !important;
+}
+
+/* Carousel transforms: make them fade/opacity-only */
+.carousel .item,
+.carousel-item,
+.jcarousel-item {
+  -webkit-transform: none !important;
+  transform: none !important;
+  -webkit-transition: opacity .22s ease !important;
+  transition: opacity .22s ease !important;
+}
+
+/* Remove small icon scaling in buttons while preserving intentional FA rotations and flips */
+.btn i, button i, a.btn i {
+  -webkit-transform: none !important;
+  transform: none !important;
+}
+
+/* Disable common helper animations that rely on scale without touching functional spinners */
+.faa-burst, .faa-bounce, .faa-pulse, .faa-passing, .faa-tada, .faa-float, .faa-parent, .bg-puff-out, .puff-out, .obj-popup {
+  animation: none !important;
+  -webkit-animation: none !important;
+  transform: none !important;
+}
+
+/* Keep FontAwesome's real spin animation working */
+.fa-spin, .fa-spin:before, .fa-spin:after {
+  -webkit-animation: fa-spin .75s linear infinite !important;
+  animation: fa-spin .75s linear infinite !important;
+}
+
+/* Make sure FA flips/rotations remain intact (avoid blanket transform reset on .fa) */
+.fa-rotate-90, .fa-rotate-180, .fa-rotate-270, .fa-flip-horizontal, .fa-flip-vertical,
+.fa-rotate {
+  -webkit-transform: inherit !important;
+  transform: inherit !important;
+}
+
+/* Strip gradients that come from palettes or compiled bundles (non-critical backgrounds) */
+[style*="linear-gradient"], [style*="repeating-linear-gradient"],
+html[class*="palette-"] [class*="background"], html[class*="palette-"] [class*="bg-"] {
+  background-image: none !important;
+  background: var(--bg-color) !important;
+}
+
+/* Row icons often use gradients; flatten them */
+.row.icons-row .small-icons-container, .row.icons-row .icons-container {
+  background-image: none !important;
+  background: transparent !important;
+}
+
+/* Some vendor classes apply scale() to thumbnails; ensure there's no transform */
+.thumbnail img, .fancybox img, .file-thumb img { transform: none !important; }
+/* ------------------------------------------------------------------
+   Override keyframes that perform 3D or translate3d animations so
+   they degrade to simple fades (no 3D transforms or scaling)
+   ------------------------------------------------------------------ */
+@-webkit-keyframes slideInDown { from { opacity: 0; -webkit-transform: none; transform: none; } to { opacity: 1; -webkit-transform: none; transform: none; }}
+@keyframes slideInDown { from { opacity: 0; transform: none; } to { opacity: 1; transform: none; }}
+@-webkit-keyframes slideInUp   { from { opacity: 0; -webkit-transform: none; transform: none; } to { opacity: 1; -webkit-transform: none; transform: none; }}
+@keyframes slideInUp   { from { opacity: 0; transform: none; } to { opacity: 1; transform: none; }}
+@-webkit-keyframes slideInLeft { from { opacity: 0; -webkit-transform: none; transform: none; } to { opacity: 1; -webkit-transform: none; transform: none; }}
+@keyframes slideInLeft { from { opacity: 0; transform: none; } to { opacity: 1; transform: none; }}
+@-webkit-keyframes slideInRight{ from { opacity: 0; -webkit-transform: none; transform: none; } to { opacity: 1; -webkit-transform: none; transform: none; }}
+@keyframes slideInRight{ from { opacity: 0; transform: none; } to { opacity: 1; transform: none; }}
+@-webkit-keyframes fadeInLeft  { from { opacity: 0; -webkit-transform: none; transform: none; } to { opacity: 1; -webkit-transform: none; transform: none; }}
+@keyframes fadeInLeft  { from { opacity: 0; transform: none; } to { opacity: 1; transform: none; }}
+@-webkit-keyframes fadeInRight { from { opacity: 0; -webkit-transform: none; transform: none; } to { opacity: 1; -webkit-transform: none; transform: none; }}
+@keyframes fadeInRight { from { opacity: 0; transform: none; } to { opacity: 1; transform: none; }}
+@-webkit-keyframes fadeInUp    { from { opacity: 0; -webkit-transform: none; transform: none; } to { opacity: 1; -webkit-transform: none; transform: none; }}
+@keyframes fadeInUp    { from { opacity: 0; transform: none; } to { opacity: 1; transform: none; }}
+@-webkit-keyframes fadeInDown  { from { opacity: 0; -webkit-transform: none; transform: none; } to { opacity: 1; -webkit-transform: none; transform: none; }}
+@keyframes fadeInDown  { from { opacity: 0; transform: none; } to { opacity: 1; transform: none; }}
+@-webkit-keyframes iziT-fadeInUp   { from { opacity: 0; -webkit-transform: none; transform: none; } to { opacity: 1; -webkit-transform: none; transform: none; }}
+@keyframes iziT-fadeInUp   { from { opacity: 0; transform: none; } to { opacity: 1; transform: none; }}
+@-webkit-keyframes iziT-fadeInDown { from { opacity: 0; -webkit-transform: none; transform: none; } to { opacity: 1; -webkit-transform: none; transform: none; }}
+@keyframes iziT-fadeInDown { from { opacity: 0; transform: none; } to { opacity: 1; transform: none; }}
+@-webkit-keyframes iziT-fadeInLeft { from { opacity: 0; -webkit-transform: none; transform: none; } to { opacity: 1; -webkit-transform: none; transform: none; }}
+@keyframes iziT-fadeInLeft { from { opacity: 0; transform: none; } to { opacity: 1; transform: none; }}
+@-webkit-keyframes iziT-fadeInRight{ from { opacity: 0; -webkit-transform: none; transform: none; } to { opacity: 1; -webkit-transform: none; transform: none; }}
+@keyframes iziT-fadeInRight{ from { opacity: 0; transform: none; } to { opacity: 1; transform: none; }}
+@-webkit-keyframes iziT-flipInX { from { opacity: 0; -webkit-transform: none; transform: none; } to { opacity: 1; -webkit-transform: none; transform: none; } }
+@keyframes iziT-flipInX { from { opacity: 0; transform: none; } to { opacity: 1; transform: none; } }
+@-webkit-keyframes iziT-flipOutX{ from { opacity: 1; -webkit-transform: none; transform: none; } to { opacity: 0; -webkit-transform: none; transform: none; } }
+@keyframes iziT-flipOutX{ from { opacity: 1; transform: none; } to { opacity: 0; transform: none; } }
+@-webkit-keyframes flipInX { from { opacity: 0; -webkit-transform: none; transform: none; } to { opacity: 1; -webkit-transform: none; transform: none; } }
+@keyframes flipInX { from { opacity: 0; transform: none; } to { opacity: 1; transform: none; } }
+@-webkit-keyframes flipOutX{ from { opacity: 1; -webkit-transform: none; transform: none; } to { opacity: 0; -webkit-transform: none; transform: none; } }
+@keyframes flipOutX{ from { opacity: 1; transform: none; } to { opacity: 0; transform: none; } }
+@keyframes Gradient { from { background-position: 0 50%; } to { background-position: 0 50%; } }
+
+/* ------------------------------------------------------------------
+   Swap animation names on classes that commonly trigger 3D/translate
+   effects so the animation is a simple fade only.
+   This avoids editing vendor code, and ensures transforms are not used.
+   ------------------------------------------------------------------ */
+.slideInDown, .slideInUp, .slideInLeft, .slideInRight,
+.slideInFromLeftHorizontal, .slideInFromRightHorizontal,
+.iziT-fadeInUp, .iziT-fadeInDown, .iziT-fadeInLeft, .iziT-fadeInRight,
+.flipInX, .flipOutX, .iziT-flipInX, .iziT-flipOutX {
+  animation-name: fadeInUp !important;
+  -webkit-animation-name: fadeInUp !important;
+  transform: none !important;
+}
+
+/* For components that rely on the session flip (rotateY) - gracefully degrade
+   the interaction to opacity toggle so the UI still functions without 3D transforms */
+.session_login_front, .session_login_back {
+  -webkit-transform: none !important;
+  transform: none !important;
+  transition: opacity .66s ease-in-out !important;
+  backface-visibility: hidden !important;
+}
+.session_login_front { opacity: 1; }
+.session_login_back { opacity: 0; pointer-events: none; }
+.session_login_flipper.flipped .session_login_front { opacity: 0; pointer-events: none; }
+.session_login_flipper.flipped .session_login_back  { opacity: 1; pointer-events: auto; }
+
+/* Also ensure that any remaining translateZ / perspective / rotateX / rotateY rules are neutralized */
+[class*="modal"] .modal-dialog,
+.modal-dialog,
+[class*="fade"] .modal-dialog,
+.session_login_flipper, .session_login_wrapper, .session_login_flipper.flipped {
+  -webkit-transform: none !important;
+  transform: none !important;
+  perspective: none !important;
+  transform-style: flat !important;
+}
+
+/* final global catch - avoid interfering with Font Awesome rotation utilities */
+*[class*="faa-"], [class*="animated"], [class*="-animation"], [class*="-ani"] {
+  /* no transforms in helper animation classes; preserves FA `fa-spin` due to explicit rule above */
+  transform: none !important;
+  -webkit-transform: none !important;
+}
+
+
