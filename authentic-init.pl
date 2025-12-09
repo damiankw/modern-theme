@@ -536,6 +536,13 @@ sub embed_styles
     if (-r $css && -s $css) {
         print ' <link type="text/css" data-custom-style href="data:text/css;base64,' .
           trim(encode_base64(read_file_contents($css))) . '" rel="stylesheet">' . "\n";
+    } else {
+        # Check for styles.css in theme root (for development/source)
+        my $theme_css = $theme_root_directory . "/styles.css";
+        if (-r $theme_css && -s $theme_css) {
+            print ' <link type="text/css" data-custom-style href="data:text/css;base64,' .
+              trim(encode_base64(read_file_contents($theme_css))) . '" rel="stylesheet">' . "\n";
+        }
     }
 
 }
